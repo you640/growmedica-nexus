@@ -63,6 +63,13 @@
 
 :root {
   --radius: 0.625rem;
+  /* GrowMedica brand tokens */
+  --gm-bg: oklch(0.985 0.01 75);
+  --gm-bg-soft: oklch(0.97 0.013 80);
+  --gm-primary: oklch(0.55 0.13 145);
+  --gm-text: oklch(0.25 0.02 80);
+  --gm-text-muted: oklch(0.55 0.02 80);
+  --gm-border: oklch(0.9 0.01 80);
   --background: oklch(1 0 0);
   --foreground: oklch(0.129 0.042 264.695);
   --card: oklch(1 0 0);
@@ -141,4 +148,17 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
   }
+}
+
+@layer utilities {
+  .bg-gm-bg { background-color: var(--gm-bg); }
+  .bg-gm-bg-soft { background-color: var(--gm-bg-soft); }
+  .text-gm-text { color: var(--gm-text); }
+  .text-gm-text-muted { color: var(--gm-text-muted); }
+  .text-gm-primary { color: var(--gm-primary); }
+  .bg-gm-primary { background-color: var(--gm-primary); }
+  .border-gm-border { border-color: var(--gm-border); }
+  .border-gm-primary { border-color: var(--gm-primary); }
+  .rounded-gm-lg { border-radius: 1rem; }
+  .ring-gm-primary { --tw-ring-color: var(--gm-primary); }
 }
