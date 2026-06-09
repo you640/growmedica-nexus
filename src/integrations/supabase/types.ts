@@ -14,7 +14,186 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      integrations: {
+        Row: {
+          config: Json
+          created_at: string
+          id: string
+          is_active: boolean
+          last_error: string | null
+          last_tested_at: string | null
+          name: string
+          provider: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          config?: Json
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          last_error?: string | null
+          last_tested_at?: string | null
+          name: string
+          provider: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          config?: Json
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          last_error?: string | null
+          last_tested_at?: string | null
+          name?: string
+          provider?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      shopify_product_cache: {
+        Row: {
+          currency: string | null
+          handle: string | null
+          image_url: string | null
+          metafields: Json | null
+          price_amount: number | null
+          shopify_id: string
+          status: string | null
+          synced_at: string
+          title: string | null
+        }
+        Insert: {
+          currency?: string | null
+          handle?: string | null
+          image_url?: string | null
+          metafields?: Json | null
+          price_amount?: number | null
+          shopify_id: string
+          status?: string | null
+          synced_at?: string
+          title?: string | null
+        }
+        Update: {
+          currency?: string | null
+          handle?: string | null
+          image_url?: string | null
+          metafields?: Json | null
+          price_amount?: number | null
+          shopify_id?: string
+          status?: string | null
+          synced_at?: string
+          title?: string | null
+        }
+        Relationships: []
+      }
+      sync_jobs: {
+        Row: {
+          created_at: string
+          finished_at: string | null
+          id: string
+          job_type: string
+          progress: number
+          provider: string
+          result: Json | null
+          started_at: string | null
+          status: string
+          total: number
+        }
+        Insert: {
+          created_at?: string
+          finished_at?: string | null
+          id?: string
+          job_type: string
+          progress?: number
+          provider: string
+          result?: Json | null
+          started_at?: string | null
+          status?: string
+          total?: number
+        }
+        Update: {
+          created_at?: string
+          finished_at?: string | null
+          id?: string
+          job_type?: string
+          progress?: number
+          provider?: string
+          result?: Json | null
+          started_at?: string | null
+          status?: string
+          total?: number
+        }
+        Relationships: []
+      }
+      webhook_endpoints: {
+        Row: {
+          created_at: string
+          events: string[]
+          framework: string | null
+          id: string
+          is_active: boolean
+          name: string
+          secret_hash: string | null
+          target_url: string
+        }
+        Insert: {
+          created_at?: string
+          events: string[]
+          framework?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          secret_hash?: string | null
+          target_url: string
+        }
+        Update: {
+          created_at?: string
+          events?: string[]
+          framework?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          secret_hash?: string | null
+          target_url?: string
+        }
+        Relationships: []
+      }
+      webhook_events: {
+        Row: {
+          created_at: string
+          error: string | null
+          id: string
+          payload: Json | null
+          relayed_to: string[] | null
+          source: string
+          status: string
+          topic: string
+        }
+        Insert: {
+          created_at?: string
+          error?: string | null
+          id?: string
+          payload?: Json | null
+          relayed_to?: string[] | null
+          source: string
+          status?: string
+          topic: string
+        }
+        Update: {
+          created_at?: string
+          error?: string | null
+          id?: string
+          payload?: Json | null
+          relayed_to?: string[] | null
+          source?: string
+          status?: string
+          topic?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
