@@ -16,6 +16,7 @@ import { Route as AdminZakazniciRouteImport } from './routes/admin/zakaznici'
 import { Route as AdminProduktyRouteImport } from './routes/admin/produkty'
 import { Route as AdminPrihlasenieRouteImport } from './routes/admin/prihlasenie'
 import { Route as AdminObjednavkyRouteImport } from './routes/admin/objednavky'
+import { Route as AdminNastaveniaRouteImport } from './routes/admin/nastavenia'
 import { Route as AdminAnalytikaRouteImport } from './routes/admin/analytika'
 import { Route as AdminAiRouteImport } from './routes/admin/ai'
 import { Route as ApiPublicWebhooksShopifyRouteImport } from './routes/api/public/webhooks/shopify'
@@ -55,6 +56,11 @@ const AdminObjednavkyRoute = AdminObjednavkyRouteImport.update({
   path: '/objednavky',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const AdminNastaveniaRoute = AdminNastaveniaRouteImport.update({
+  id: '/nastavenia',
+  path: '/nastavenia',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const AdminAnalytikaRoute = AdminAnalytikaRouteImport.update({
   id: '/analytika',
   path: '/analytika',
@@ -77,6 +83,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteRouteWithChildren
   '/admin/ai': typeof AdminAiRoute
   '/admin/analytika': typeof AdminAnalytikaRoute
+  '/admin/nastavenia': typeof AdminNastaveniaRoute
   '/admin/objednavky': typeof AdminObjednavkyRoute
   '/admin/prihlasenie': typeof AdminPrihlasenieRoute
   '/admin/produkty': typeof AdminProduktyRoute
@@ -88,6 +95,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin/ai': typeof AdminAiRoute
   '/admin/analytika': typeof AdminAnalytikaRoute
+  '/admin/nastavenia': typeof AdminNastaveniaRoute
   '/admin/objednavky': typeof AdminObjednavkyRoute
   '/admin/prihlasenie': typeof AdminPrihlasenieRoute
   '/admin/produkty': typeof AdminProduktyRoute
@@ -101,6 +109,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteRouteWithChildren
   '/admin/ai': typeof AdminAiRoute
   '/admin/analytika': typeof AdminAnalytikaRoute
+  '/admin/nastavenia': typeof AdminNastaveniaRoute
   '/admin/objednavky': typeof AdminObjednavkyRoute
   '/admin/prihlasenie': typeof AdminPrihlasenieRoute
   '/admin/produkty': typeof AdminProduktyRoute
@@ -115,6 +124,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin/ai'
     | '/admin/analytika'
+    | '/admin/nastavenia'
     | '/admin/objednavky'
     | '/admin/prihlasenie'
     | '/admin/produkty'
@@ -126,6 +136,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin/ai'
     | '/admin/analytika'
+    | '/admin/nastavenia'
     | '/admin/objednavky'
     | '/admin/prihlasenie'
     | '/admin/produkty'
@@ -138,6 +149,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin/ai'
     | '/admin/analytika'
+    | '/admin/nastavenia'
     | '/admin/objednavky'
     | '/admin/prihlasenie'
     | '/admin/produkty'
@@ -203,6 +215,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminObjednavkyRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/admin/nastavenia': {
+      id: '/admin/nastavenia'
+      path: '/nastavenia'
+      fullPath: '/admin/nastavenia'
+      preLoaderRoute: typeof AdminNastaveniaRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/admin/analytika': {
       id: '/admin/analytika'
       path: '/analytika'
@@ -230,6 +249,7 @@ declare module '@tanstack/react-router' {
 interface AdminRouteRouteChildren {
   AdminAiRoute: typeof AdminAiRoute
   AdminAnalytikaRoute: typeof AdminAnalytikaRoute
+  AdminNastaveniaRoute: typeof AdminNastaveniaRoute
   AdminObjednavkyRoute: typeof AdminObjednavkyRoute
   AdminPrihlasenieRoute: typeof AdminPrihlasenieRoute
   AdminProduktyRoute: typeof AdminProduktyRoute
@@ -240,6 +260,7 @@ interface AdminRouteRouteChildren {
 const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminAiRoute: AdminAiRoute,
   AdminAnalytikaRoute: AdminAnalytikaRoute,
+  AdminNastaveniaRoute: AdminNastaveniaRoute,
   AdminObjednavkyRoute: AdminObjednavkyRoute,
   AdminPrihlasenieRoute: AdminPrihlasenieRoute,
   AdminProduktyRoute: AdminProduktyRoute,
