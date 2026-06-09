@@ -1,0 +1,70 @@
+import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
+
+const TokenInput = z.object({ token: z.string().min(10) });
+
+export const verifyAdminAccess = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => TokenInput.parse(d))
+  .handler(async ({ data }) => {
+    const { requireAdmin } = await import("./firebase-verify.server");
+    const claims = await requireAdmin(data.token);
+    return { email: claims.email, uid: claims.uid, name: claims.name ?? null };
+  });
+
+/** Get current integrations list (status only, no secret values). */
+export const listIntegrations = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => TokenInput.parse(d))
+  .handler(async ({ data }) => {
+    const { requireAdmin } = await import("./firebase-verify.server");
+    await requireAdmin(data.token);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: rows, error } = await supabaseAdmin
+      .from("integrations")
+      .select("id, provider, name, status, is_active, last_tested_at, last_error, updated_at")
+      .order("provider", { ascending: true });
+    if (error) throw new Error(error.message);
+    return { integrations: rows ?? [] };
+  });
+
+const UpsertInput = z.object({
+  token: z.string().min(10),
+  provider: z.string().min(1).max(64),
+  name: z.string().min(1).max(128).default("default"),
+  config: z.record(z.string(), z.unknown()),
+});
+
+export const upsertIntegrationConfig = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => UpsertInput.parse(d))
+  .handler(async ({ data }) => {
+    const { requireAdmin } = await import("./firebase-verify.server");
+    await requireAdmin(data.token);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
+      .from("integrations")
+      .upsert(
+        {
+          provider: data.provider,
+          name: data.name,
+          config: data.config,
+        },
+        { onConflict: "provider,name" }
+      );
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+/** Recent webhook events (for Lovable Cloud card). */
+export const listRecentWebhookEvents = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => TokenInput.parse(d))
+  .handler(async ({ data }) => {
+    const { requireAdmin } = await import("./firebase-verify.server");
+    await requireAdmin(data.token);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: rows, error } = await supabaseAdmin
+      .from("webhook_events")
+      .select("id, source, topic, status, error, created_at")
+      .order("created_at", { ascending: false })
+      .limit(50);
+    if (error) throw new Error(error.message);
+    return { events: rows ?? [] };
+  });
