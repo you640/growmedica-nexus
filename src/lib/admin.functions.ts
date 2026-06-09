@@ -45,7 +45,8 @@ export const upsertIntegrationConfig = createServerFn({ method: "POST" })
         {
           provider: data.provider,
           name: data.name,
-          config: data.config,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          config: data.config as any,
         },
         { onConflict: "provider,name" }
       );
