@@ -9,38 +9,170 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as AdminZakazniciRouteImport } from './routes/admin/zakaznici'
+import { Route as AdminProduktyRouteImport } from './routes/admin/produkty'
+import { Route as AdminPrihlasenieRouteImport } from './routes/admin/prihlasenie'
+import { Route as AdminObjednavkyRouteImport } from './routes/admin/objednavky'
+import { Route as AdminNastaveniaRouteImport } from './routes/admin/nastavenia'
+import { Route as AdminAnalytikaRouteImport } from './routes/admin/analytika'
+import { Route as AdminAiRouteImport } from './routes/admin/ai'
+import { Route as ApiPublicWebhooksShopifyRouteImport } from './routes/api/public/webhooks/shopify'
 
+const AdminRouteRoute = AdminRouteRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminZakazniciRoute = AdminZakazniciRouteImport.update({
+  id: '/zakaznici',
+  path: '/zakaznici',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminProduktyRoute = AdminProduktyRouteImport.update({
+  id: '/produkty',
+  path: '/produkty',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminPrihlasenieRoute = AdminPrihlasenieRouteImport.update({
+  id: '/prihlasenie',
+  path: '/prihlasenie',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminObjednavkyRoute = AdminObjednavkyRouteImport.update({
+  id: '/objednavky',
+  path: '/objednavky',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminNastaveniaRoute = AdminNastaveniaRouteImport.update({
+  id: '/nastavenia',
+  path: '/nastavenia',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminAnalytikaRoute = AdminAnalytikaRouteImport.update({
+  id: '/analytika',
+  path: '/analytika',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminAiRoute = AdminAiRouteImport.update({
+  id: '/ai',
+  path: '/ai',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const ApiPublicWebhooksShopifyRoute =
+  ApiPublicWebhooksShopifyRouteImport.update({
+    id: '/api/public/webhooks/shopify',
+    path: '/api/public/webhooks/shopify',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteRouteWithChildren
+  '/admin/ai': typeof AdminAiRoute
+  '/admin/analytika': typeof AdminAnalytikaRoute
+  '/admin/nastavenia': typeof AdminNastaveniaRoute
+  '/admin/objednavky': typeof AdminObjednavkyRoute
+  '/admin/prihlasenie': typeof AdminPrihlasenieRoute
+  '/admin/produkty': typeof AdminProduktyRoute
+  '/admin/zakaznici': typeof AdminZakazniciRoute
+  '/admin/': typeof AdminIndexRoute
+  '/api/public/webhooks/shopify': typeof ApiPublicWebhooksShopifyRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin/ai': typeof AdminAiRoute
+  '/admin/analytika': typeof AdminAnalytikaRoute
+  '/admin/nastavenia': typeof AdminNastaveniaRoute
+  '/admin/objednavky': typeof AdminObjednavkyRoute
+  '/admin/prihlasenie': typeof AdminPrihlasenieRoute
+  '/admin/produkty': typeof AdminProduktyRoute
+  '/admin/zakaznici': typeof AdminZakazniciRoute
+  '/admin': typeof AdminIndexRoute
+  '/api/public/webhooks/shopify': typeof ApiPublicWebhooksShopifyRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteRouteWithChildren
+  '/admin/ai': typeof AdminAiRoute
+  '/admin/analytika': typeof AdminAnalytikaRoute
+  '/admin/nastavenia': typeof AdminNastaveniaRoute
+  '/admin/objednavky': typeof AdminObjednavkyRoute
+  '/admin/prihlasenie': typeof AdminPrihlasenieRoute
+  '/admin/produkty': typeof AdminProduktyRoute
+  '/admin/zakaznici': typeof AdminZakazniciRoute
+  '/admin/': typeof AdminIndexRoute
+  '/api/public/webhooks/shopify': typeof ApiPublicWebhooksShopifyRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/admin/ai'
+    | '/admin/analytika'
+    | '/admin/nastavenia'
+    | '/admin/objednavky'
+    | '/admin/prihlasenie'
+    | '/admin/produkty'
+    | '/admin/zakaznici'
+    | '/admin/'
+    | '/api/public/webhooks/shopify'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/admin/ai'
+    | '/admin/analytika'
+    | '/admin/nastavenia'
+    | '/admin/objednavky'
+    | '/admin/prihlasenie'
+    | '/admin/produkty'
+    | '/admin/zakaznici'
+    | '/admin'
+    | '/api/public/webhooks/shopify'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/admin/ai'
+    | '/admin/analytika'
+    | '/admin/nastavenia'
+    | '/admin/objednavky'
+    | '/admin/prihlasenie'
+    | '/admin/produkty'
+    | '/admin/zakaznici'
+    | '/admin/'
+    | '/api/public/webhooks/shopify'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRouteRoute: typeof AdminRouteRouteWithChildren
+  ApiPublicWebhooksShopifyRoute: typeof ApiPublicWebhooksShopifyRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +180,103 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/zakaznici': {
+      id: '/admin/zakaznici'
+      path: '/zakaznici'
+      fullPath: '/admin/zakaznici'
+      preLoaderRoute: typeof AdminZakazniciRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/produkty': {
+      id: '/admin/produkty'
+      path: '/produkty'
+      fullPath: '/admin/produkty'
+      preLoaderRoute: typeof AdminProduktyRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/prihlasenie': {
+      id: '/admin/prihlasenie'
+      path: '/prihlasenie'
+      fullPath: '/admin/prihlasenie'
+      preLoaderRoute: typeof AdminPrihlasenieRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/objednavky': {
+      id: '/admin/objednavky'
+      path: '/objednavky'
+      fullPath: '/admin/objednavky'
+      preLoaderRoute: typeof AdminObjednavkyRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/nastavenia': {
+      id: '/admin/nastavenia'
+      path: '/nastavenia'
+      fullPath: '/admin/nastavenia'
+      preLoaderRoute: typeof AdminNastaveniaRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/analytika': {
+      id: '/admin/analytika'
+      path: '/analytika'
+      fullPath: '/admin/analytika'
+      preLoaderRoute: typeof AdminAnalytikaRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/ai': {
+      id: '/admin/ai'
+      path: '/ai'
+      fullPath: '/admin/ai'
+      preLoaderRoute: typeof AdminAiRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/api/public/webhooks/shopify': {
+      id: '/api/public/webhooks/shopify'
+      path: '/api/public/webhooks/shopify'
+      fullPath: '/api/public/webhooks/shopify'
+      preLoaderRoute: typeof ApiPublicWebhooksShopifyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
+interface AdminRouteRouteChildren {
+  AdminAiRoute: typeof AdminAiRoute
+  AdminAnalytikaRoute: typeof AdminAnalytikaRoute
+  AdminNastaveniaRoute: typeof AdminNastaveniaRoute
+  AdminObjednavkyRoute: typeof AdminObjednavkyRoute
+  AdminPrihlasenieRoute: typeof AdminPrihlasenieRoute
+  AdminProduktyRoute: typeof AdminProduktyRoute
+  AdminZakazniciRoute: typeof AdminZakazniciRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteRouteChildren: AdminRouteRouteChildren = {
+  AdminAiRoute: AdminAiRoute,
+  AdminAnalytikaRoute: AdminAnalytikaRoute,
+  AdminNastaveniaRoute: AdminNastaveniaRoute,
+  AdminObjednavkyRoute: AdminObjednavkyRoute,
+  AdminPrihlasenieRoute: AdminPrihlasenieRoute,
+  AdminProduktyRoute: AdminProduktyRoute,
+  AdminZakazniciRoute: AdminZakazniciRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
+  AdminRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRouteRoute: AdminRouteRouteWithChildren,
+  ApiPublicWebhooksShopifyRoute: ApiPublicWebhooksShopifyRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
