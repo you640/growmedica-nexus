@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
+import { toast } from "sonner";
 import { GlassPanel, SectionHeading } from "@/components/admin/AdminShell";
 import { useAuth } from "@/components/admin/AuthProvider";
 import {
@@ -116,7 +117,7 @@ function SettingsPage() {
           {tab === "shopify" && <ShopifyCard onSaved={refresh} />}
           {tab === "lovable_cloud" && <LovableCloudCard />}
           {tab !== "shopify" && tab !== "lovable_cloud" && (
-            <PlaceholderCard label={PROVIDERS.find((p) => p.id === tab)!.label} />
+            <GenericConfigCard providerId={tab} onSaved={refresh} />
           )}
         </div>
       </div>
@@ -161,9 +162,11 @@ function ShopifyCard({ onSaved }: { onSaved: () => void }) {
         data: { token, provider: "shopify", name: "default", config },
       });
       setSavedMsg("Uložené.");
+      toast.success("Konfigurácia Shopify uložená.");
       onSaved();
     } catch (e) {
       setSavedMsg(`Chyba: ${(e as Error).message}`);
+      toast.error(`Chyba: ${(e as Error).message}`);
     } finally {
       setSaving(false);
     }
@@ -177,6 +180,11 @@ function ShopifyCard({ onSaved }: { onSaved: () => void }) {
     try {
       const r = await test({ data: { token } });
       setResult(r);
+      if (r.storefront.ok && r.admin.ok) {
+        toast.success(`Pripojené: ${r.admin.shop ?? r.storefront.shop}`);
+      } else {
+        toast.error("Test pripojenia zlyhal — skontrolujte tokeny.");
+      }
       onSaved();
     } catch (e) {
       setResult({
@@ -185,6 +193,7 @@ function ShopifyCard({ onSaved }: { onSaved: () => void }) {
         domain: null,
         apiVersion: "",
       } as TestResult);
+      toast.error((e as Error).message);
     } finally {
       setTesting(false);
     }
@@ -382,13 +391,199 @@ function LovableCloudCard() {
   );
 }
 
-function PlaceholderCard({ label }: { label: string }) {
+type FieldSpec = {
+  key: string;
+  label: string;
+  placeholder?: string;
+  secret?: boolean;
+  textarea?: boolean;
+};
+
+const PROVIDER_SCHEMAS: Record<
+  string,
+  { label: string; description: string; fields: FieldSpec[] }
+> = {
+  vercel: {
+    label: "Vercel",
+    description:
+      "Deploy hooks a project metadata. Použité pre rebuild po AI optimalizácii produktov.",
+    fields: [
+      { key: "project_id", label: "Project ID", placeholder: "prj_…" },
+      { key: "team_id", label: "Team ID (voliteľné)", placeholder: "team_…" },
+      { key: "api_token", label: "API token", secret: true, placeholder: "vrcl_…" },
+      { key: "deploy_hook_url", label: "Deploy hook URL", secret: true },
+    ],
+  },
+  firebase: {
+    label: "Firebase",
+    description:
+      "Firebase config je v Lovable Cloud secretoch (FIREBASE_API_KEY, FIREBASE_AUTH_DOMAIN, FIREBASE_PROJECT_ID, FIREBASE_APP_ID, ADMIN_EMAILS). Tu nastavte voliteľný override.",
+    fields: [
+      { key: "auth_domain_override", label: "Auth domain override" },
+      {
+        key: "admin_emails_extra",
+        label: "Ďalšie admin e-maily (čiarkou oddelené)",
+        placeholder: "user@example.com, second@example.com",
+      },
+    ],
+  },
+  google_ai: {
+    label: "Google AI / Gemini",
+    description:
+      "Gemini je primárny LLM, Mistral fallback. API kľúče si nastavte v Lovable Cloud secretoch (GEMINI_API_KEY, MISTRAL_API_KEY). Tu konfigurujte modely a limity.",
+    fields: [
+      {
+        key: "gemini_model",
+        label: "Gemini model",
+        placeholder: "gemini-2.5-flash",
+      },
+      {
+        key: "mistral_model",
+        label: "Mistral fallback model",
+        placeholder: "mistral-large-latest",
+      },
+      { key: "max_tokens", label: "Max tokens", placeholder: "2048" },
+    ],
+  },
+  gcp: {
+    label: "Google Cloud",
+    description:
+      "Service account pre Google Cloud Storage / Vertex AI. Vložte celý service account JSON — uloží sa zašifrovane.",
+    fields: [
+      { key: "project_id", label: "GCP Project ID" },
+      { key: "bucket", label: "Default bucket" },
+      {
+        key: "service_account_json",
+        label: "Service account JSON",
+        secret: true,
+        textarea: true,
+      },
+    ],
+  },
+  wordpress: {
+    label: "WordPress",
+    description:
+      "Spojenie s WordPress REST API (napr. blog GrowMedica). Pre auth použite Application Password.",
+    fields: [
+      { key: "base_url", label: "Base URL", placeholder: "https://blog.example.com" },
+      { key: "username", label: "WP používateľ" },
+      { key: "app_password", label: "Application password", secret: true },
+    ],
+  },
+  custom: {
+    label: "Custom Webhook",
+    description:
+      "Vlastný relay endpoint, ktorému budeme posielať preposlané Shopify eventy (Fáza 2 — fan-out engine).",
+    fields: [
+      { key: "target_url", label: "Target URL", placeholder: "https://hooks.example.com/in" },
+      { key: "secret", label: "Shared secret (HMAC)", secret: true },
+      {
+        key: "events",
+        label: "Eventy (čiarkou oddelené)",
+        placeholder: "products/create,orders/create",
+      },
+    ],
+  },
+};
+
+function GenericConfigCard({
+  providerId,
+  onSaved,
+}: {
+  providerId: string;
+  onSaved: () => void;
+}) {
+  const schema = PROVIDER_SCHEMAS[providerId];
+  const { getToken } = useAuth();
+  const upsert = useServerFn(upsertIntegrationConfig);
+  const [form, setForm] = useState<Record<string, string>>({});
+  const [saving, setSaving] = useState(false);
+
+  if (!schema) {
+    return (
+      <GlassPanel className="p-6">
+        <p className="text-sm text-gm-text-muted">Neznámy provider.</p>
+      </GlassPanel>
+    );
+  }
+
+  async function save() {
+    const token = await getToken();
+    if (!token) {
+      toast.error("Nie ste prihlásený.");
+      return;
+    }
+    setSaving(true);
+    try {
+      const config: Record<string, string> = {};
+      for (const f of schema.fields) {
+        if (form[f.key]) config[f.key] = form[f.key];
+      }
+      await upsert({
+        data: { token, provider: providerId, name: "default", config },
+      });
+      toast.success(`${schema.label} uložené.`);
+      onSaved();
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setSaving(false);
+    }
+  }
+
   return (
-    <GlassPanel className="p-6">
-      <h2 className="text-lg font-semibold">{label}</h2>
-      <p className="text-sm text-gm-text-muted mt-2">
-        Karta bude aktivovaná vo Fáze 3/4 (test connection, manažment configu, log používania).
-      </p>
+    <GlassPanel className="p-6 space-y-6">
+      <div>
+        <h2 className="text-lg font-semibold">{schema.label}</h2>
+        <p className="text-sm text-gm-text-muted mt-1 max-w-2xl">
+          {schema.description}
+        </p>
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-2">
+        {schema.fields.map((f) =>
+          f.textarea ? (
+            <label key={f.key} className="block text-sm md:col-span-2">
+              <span className="text-xs uppercase tracking-wider text-gm-text-muted">
+                {f.label}
+              </span>
+              <textarea
+                value={form[f.key] ?? ""}
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev, [f.key]: e.target.value }))
+                }
+                placeholder={f.placeholder}
+                rows={6}
+                className="mt-1 w-full rounded-md border border-gm-border bg-white px-3 py-2 font-mono text-xs focus:outline-none focus:ring-2 ring-gm-primary/30"
+              />
+            </label>
+          ) : (
+            <Field
+              key={f.key}
+              label={f.label}
+              placeholder={f.placeholder}
+              secret={f.secret}
+              value={form[f.key] ?? ""}
+              onChange={(v) =>
+                setForm((prev) => ({ ...prev, [f.key]: v }))
+              }
+            />
+          )
+        )}
+      </div>
+
+      <div className="flex flex-wrap gap-3">
+        <button
+          onClick={save}
+          disabled={saving}
+          className="rounded-full bg-gm-primary text-white px-5 py-2 text-sm hover:opacity-90 disabled:opacity-50"
+        >
+          {saving ? "Ukladám…" : "Uložiť konfiguráciu"}
+        </button>
+        <span className="text-xs text-gm-text-muted self-center">
+          Live API volania pre tento provider sa aktivujú vo Fáze 2 / 3.
+        </span>
+      </div>
     </GlassPanel>
   );
 }
