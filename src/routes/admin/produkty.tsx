@@ -1,13 +1,21 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { GlassPanel, SectionHeading } from "@/components/admin/AdminShell";
+import { PhaseStub } from "@/components/admin/PhaseStub";
+import { Package } from "lucide-react";
 
 export const Route = createFileRoute("/admin/produkty")({
   component: () => (
-    <div>
-      <SectionHeading title="Produkty" subtitle="Shopify produkty + AI optimalizácia. Aktivuje sa vo Fáze 2." />
-      <GlassPanel className="p-6 text-sm text-gm-text-muted">
-        Po dokončení Fázy 1 (Shopify pripojenie v Nastaveniach) sa tu zobrazí live tabuľka produktov s AI drawerom.
-      </GlassPanel>
-    </div>
+    <PhaseStub
+      title="Produkty"
+      subtitle="Shopify produkty + AI SEO optimalizácia."
+      phase="Fáza 2"
+      icon={<Package className="w-5 h-5" />}
+      bullets={[
+        "Live tabuľka produktov zo Shopify Admin API",
+        "AI drawer pre Gemini SEO rewrite (title, meta, popis)",
+        "Bulk akcie a inline status toggle",
+        "Sync metafields a kategórií",
+      ]}
+      cta={{ label: "Pripojiť Shopify v Nastaveniach", to: "/admin/nastavenia" }}
+    />
   ),
 });

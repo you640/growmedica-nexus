@@ -22,7 +22,10 @@ export const listIntegrations = createServerFn({ method: "POST" })
       .from("integrations")
       .select("id, provider, name, status, is_active, last_tested_at, last_error, updated_at")
       .order("provider", { ascending: true });
-    if (error) throw new Error(error.message);
+    if (error) {
+      console.error("[db:listIntegrations]", error);
+      throw new Error("Nepodarilo sa načítať integrácie.");
+    }
     return { integrations: rows ?? [] };
   });
 
@@ -50,7 +53,10 @@ export const upsertIntegrationConfig = createServerFn({ method: "POST" })
         },
         { onConflict: "provider,name" }
       );
-    if (error) throw new Error(error.message);
+    if (error) {
+      console.error("[db:upsertIntegration]", error);
+      throw new Error("Uloženie konfigurácie zlyhalo.");
+    }
     return { ok: true };
   });
 
@@ -66,6 +72,9 @@ export const listRecentWebhookEvents = createServerFn({ method: "POST" })
       .select("id, source, topic, status, error, created_at")
       .order("created_at", { ascending: false })
       .limit(50);
-    if (error) throw new Error(error.message);
+    if (error) {
+      console.error("[db:listWebhookEvents]", error);
+      throw new Error("Nepodarilo sa načítať webhook eventy.");
+    }
     return { events: rows ?? [] };
   });

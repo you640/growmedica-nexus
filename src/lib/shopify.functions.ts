@@ -85,10 +85,12 @@ export const testShopifyConnection = createServerFn({ method: "POST" })
         if (r.status === 200 && r.json?.data?.shop?.name) {
           result.storefront = { ok: true, shop: r.json.data.shop.name };
         } else {
-          result.storefront.error = `HTTP ${r.status}: ${JSON.stringify(r.json).slice(0, 200)}`;
+          console.error("[shopify:storefront]", r.status, r.json);
+          result.storefront.error = `HTTP ${r.status} — Storefront API odmietlo požiadavku.`;
         }
       } catch (e) {
-        result.storefront.error = (e as Error).message;
+        console.error("[shopify:storefront]", e);
+        result.storefront.error = "Sieťová chyba pri pripojení na Storefront API.";
       }
     } else {
       result.storefront.error = "Storefront token chýba";
@@ -110,10 +112,12 @@ export const testShopifyConnection = createServerFn({ method: "POST" })
             email: r.json.data.shop.email,
           };
         } else {
-          result.admin.error = `HTTP ${r.status}: ${JSON.stringify(r.json).slice(0, 200)}`;
+          console.error("[shopify:admin]", r.status, r.json);
+          result.admin.error = `HTTP ${r.status} — Admin API odmietlo požiadavku.`;
         }
       } catch (e) {
-        result.admin.error = (e as Error).message;
+        console.error("[shopify:admin]", e);
+        result.admin.error = "Sieťová chyba pri pripojení na Admin API.";
       }
     } else {
       result.admin.error = "Admin token chýba";
