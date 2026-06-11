@@ -1,7 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import { z } from "zod";
-
-const TestInput = z.object({ token: z.string().min(10) });
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 type ShopifyCfg = {
   store_domain?: string;
@@ -49,10 +47,10 @@ async function gql(
 }
 
 export const testShopifyConnection = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) => TestInput.parse(d))
-  .handler(async ({ data }) => {
-    const { requireAdmin } = await import("./firebase-verify.server");
-    await requireAdmin(data.token);
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { assertAdmin } = await import("./admin-guard.server");
+    assertAdmin(context.claims);
     const cfg = await loadShopifyConfig();
 
     const result: {

@@ -6,15 +6,17 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import type { User } from "firebase/auth";
-import { subscribeAuth, signInWithGoogle, signOutUser, getIdToken } from "@/lib/firebase-client";
+import type { User } from "@supabase/supabase-js";
+import { supabase } from "@/integrations/supabase/client";
+import { lovable } from "@/integrations/lovable";
+
+type Provider = "google" | "apple";
 
 type Ctx = {
   user: User | null;
   loading: boolean;
-  signIn: () => Promise<void>;
+  signInWithProvider: (provider: Provider) => Promise<void>;
   signOut: () => Promise<void>;
-  getToken: () => Promise<string | null>;
 };
 
 const AuthCtx = createContext<Ctx | null>(null);
@@ -24,15 +26,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    let unsub: (() => void) | undefined;
-    (async () => {
-      unsub = await subscribeAuth((u) => {
-        setUser(u);
-        setLoading(false);
-      });
-    })();
+    let mounted = true;
+    supabase.auth.getUser().then(({ data }) => {
+      if (!mounted) return;
+      setUser(data.user ?? null);
+      setLoading(false);
+    });
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      setLoading(false);
+    });
     return () => {
-      unsub?.();
+      mounted = false;
+      sub.subscription.unsubscribe();
     };
   }, []);
 
@@ -40,13 +46,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     () => ({
       user,
       loading,
-      signIn: async () => {
-        await signInWithGoogle();
+      signInWithProvider: async (provider) => {
+        const res = await lovable.auth.signInWithOAuth(provider, {
+          redirect_uri: `${window.location.origin}/admin`,
+        });
+        if (res.error) throw res.error;
       },
       signOut: async () => {
-        await signOutUser();
+        await supabase.auth.signOut();
       },
-      getToken: getIdToken,
     }),
     [user, loading]
   );

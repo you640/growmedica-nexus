@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { GlassPanel, SectionHeading } from "@/components/admin/AdminShell";
-import { useAuth } from "@/components/admin/AuthProvider";
 import {
   listIntegrations,
   upsertIntegrationConfig,
@@ -63,14 +62,11 @@ function StatusDot({ status }: { status?: string | null }) {
 
 function SettingsPage() {
   const [tab, setTab] = useState<Tab>("shopify");
-  const { getToken } = useAuth();
   const listFn = useServerFn(listIntegrations);
   const [integrations, setIntegrations] = useState<IntegrationRow[]>([]);
 
   async function refresh() {
-    const token = await getToken();
-    if (!token) return;
-    const r = await listFn({ data: { token } });
+    const r = await listFn();
     setIntegrations(r.integrations as IntegrationRow[]);
   }
   useEffect(() => {
@@ -126,7 +122,6 @@ function SettingsPage() {
 }
 
 function ShopifyCard({ onSaved }: { onSaved: () => void }) {
-  const { getToken } = useAuth();
   const upsert = useServerFn(upsertIntegrationConfig);
   const test = useServerFn(testShopifyConnection);
 
@@ -144,8 +139,6 @@ function ShopifyCard({ onSaved }: { onSaved: () => void }) {
   const [savedMsg, setSavedMsg] = useState<string | null>(null);
 
   async function save() {
-    const token = await getToken();
-    if (!token) return;
     setSaving(true);
     setSavedMsg(null);
     try {
@@ -159,7 +152,7 @@ function ShopifyCard({ onSaved }: { onSaved: () => void }) {
         if (form[k]) config[k] = form[k];
       }
       await upsert({
-        data: { token, provider: "shopify", name: "default", config },
+        data: { provider: "shopify", name: "default", config },
       });
       setSavedMsg("Uložené.");
       toast.success("Konfigurácia Shopify uložená.");
@@ -173,12 +166,10 @@ function ShopifyCard({ onSaved }: { onSaved: () => void }) {
   }
 
   async function runTest() {
-    const token = await getToken();
-    if (!token) return;
     setTesting(true);
     setResult(null);
     try {
-      const r = await test({ data: { token } });
+      const r = await test();
       setResult(r);
       if (r.storefront.ok && r.admin.ok) {
         toast.success(`Pripojené: ${r.admin.shop ?? r.storefront.shop}`);
@@ -302,7 +293,6 @@ function ShopifyCard({ onSaved }: { onSaved: () => void }) {
 }
 
 function LovableCloudCard() {
-  const { getToken } = useAuth();
   const fn = useServerFn(listRecentWebhookEvents);
   type EventRow = {
     id: string;
@@ -319,9 +309,7 @@ function LovableCloudCard() {
     (async () => {
       setLoading(true);
       try {
-        const token = await getToken();
-        if (!token) return;
-        const r = await fn({ data: { token } });
+        const r = await fn();
         setEvents(r.events as EventRow[]);
       } finally {
         setLoading(false);
@@ -494,7 +482,6 @@ function GenericConfigCard({
   onSaved: () => void;
 }) {
   const schema = PROVIDER_SCHEMAS[providerId];
-  const { getToken } = useAuth();
   const upsert = useServerFn(upsertIntegrationConfig);
   const [form, setForm] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
@@ -508,11 +495,6 @@ function GenericConfigCard({
   }
 
   async function save() {
-    const token = await getToken();
-    if (!token) {
-      toast.error("Nie ste prihlásený.");
-      return;
-    }
     setSaving(true);
     try {
       const config: Record<string, string> = {};
@@ -520,7 +502,7 @@ function GenericConfigCard({
         if (form[f.key]) config[f.key] = form[f.key];
       }
       await upsert({
-        data: { token, provider: providerId, name: "default", config },
+        data: { provider: providerId, name: "default", config },
       });
       toast.success(`${schema.label} uložené.`);
       onSaved();
