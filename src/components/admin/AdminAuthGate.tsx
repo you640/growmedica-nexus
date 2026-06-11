@@ -11,7 +11,7 @@ type AccessState =
   | { kind: "ok"; email: string };
 
 export function AdminAuthGate({ children }: { children: ReactNode }) {
-  const { user, loading, getToken } = useAuth();
+  const { user, loading } = useAuth();
   const verify = useServerFn(verifyAdminAccess);
   const [state, setState] = useState<AccessState>({ kind: "loading" });
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -25,12 +25,7 @@ export function AdminAuthGate({ children }: { children: ReactNode }) {
         return;
       }
       try {
-        const token = await getToken();
-        if (!token) {
-          setState({ kind: "anonymous" });
-          return;
-        }
-        const res = await verify({ data: { token } });
+        const res = await verify();
         if (!cancelled) setState({ kind: "ok", email: res.email });
       } catch (e) {
         const msg = (e as Error).message ?? "";
@@ -45,7 +40,7 @@ export function AdminAuthGate({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, [user, loading, getToken, verify]);
+  }, [user, loading, verify]);
 
   if (state.kind === "loading") {
     return (

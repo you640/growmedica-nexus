@@ -1,22 +1,25 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-
-const TokenInput = z.object({ token: z.string().min(10) });
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 export const verifyAdminAccess = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) => TokenInput.parse(d))
-  .handler(async ({ data }) => {
-    const { requireAdmin } = await import("./firebase-verify.server");
-    const claims = await requireAdmin(data.token);
-    return { email: claims.email, uid: claims.uid, name: claims.name ?? null };
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { assertAdmin } = await import("./admin-guard.server");
+    const { email, uid } = assertAdmin(context.claims);
+    const name =
+      (context.claims as Record<string, unknown>).name ??
+      (context.claims as Record<string, unknown>).full_name ??
+      null;
+    return { email, uid, name: typeof name === "string" ? name : null };
   });
 
 /** Get current integrations list (status only, no secret values). */
 export const listIntegrations = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) => TokenInput.parse(d))
-  .handler(async ({ data }) => {
-    const { requireAdmin } = await import("./firebase-verify.server");
-    await requireAdmin(data.token);
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { assertAdmin } = await import("./admin-guard.server");
+    assertAdmin(context.claims);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: rows, error } = await supabaseAdmin
       .from("integrations")
@@ -30,17 +33,17 @@ export const listIntegrations = createServerFn({ method: "POST" })
   });
 
 const UpsertInput = z.object({
-  token: z.string().min(10),
   provider: z.string().min(1).max(64),
   name: z.string().min(1).max(128).default("default"),
   config: z.record(z.string(), z.unknown()),
 });
 
 export const upsertIntegrationConfig = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => UpsertInput.parse(d))
-  .handler(async ({ data }) => {
-    const { requireAdmin } = await import("./firebase-verify.server");
-    await requireAdmin(data.token);
+  .handler(async ({ data, context }) => {
+    const { assertAdmin } = await import("./admin-guard.server");
+    assertAdmin(context.claims);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin
       .from("integrations")
@@ -62,10 +65,10 @@ export const upsertIntegrationConfig = createServerFn({ method: "POST" })
 
 /** Recent webhook events (for Lovable Cloud card). */
 export const listRecentWebhookEvents = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) => TokenInput.parse(d))
-  .handler(async ({ data }) => {
-    const { requireAdmin } = await import("./firebase-verify.server");
-    await requireAdmin(data.token);
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { assertAdmin } = await import("./admin-guard.server");
+    assertAdmin(context.claims);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: rows, error } = await supabaseAdmin
       .from("webhook_events")
